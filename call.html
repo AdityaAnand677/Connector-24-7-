@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connector Meeting Room</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+height:100vh;
+background:#f5f8ff;
+display:flex;
+flex-direction:column;
+}
+
+/* TOP BAR */
+
+.topbar{
+height:70px;
+background:white;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 20px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+}
+
+.logo{
+font-size:30px;
+font-weight:bold;
+color:#ff5fa2;
+}
+
+.top-right{
+display:flex;
+gap:10px;
+}
+
+.help-btn{
+background:#4a90e2;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.leave-btn{
+background:red;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* MAIN */
+
+.main-container{
+flex:1;
+display:flex;
+padding:10px;
+gap:10px;
+}
+
+/* VIDEO AREA */
+
+.video-area{
+flex:4;
+background:black;
+border-radius:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+font-size:25px;
+font-weight:bold;
+}
+
+/* RIGHT PANEL */
+
+.side-panel{
+flex:1;
+background:white;
+border-radius:20px;
+padding:15px;
+box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+.side-panel h3{
+color:#4a90e2;
+margin-bottom:10px;
+}
+
+.participants{
+margin-bottom:20px;
+}
+
+.participants ul{
+list-style:none;
+}
+
+.participants li{
+padding:8px;
+background:#f1f7ff;
+margin:5px 0;
+border-radius:8px;
+}
+
+.chat-box{
+height:220px;
+border:1px solid #ddd;
+border-radius:10px;
+padding:10px;
+overflow:auto;
+margin-bottom:10px;
+}
+
+.chat-input{
+width:100%;
+padding:10px;
+border:1px solid #ccc;
+border-radius:10px;
+}
+
+/* AI BUTTON */
+
+.ai-btn{
+width:100%;
+margin-top:15px;
+background:#ff5fa2;
+color:white;
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* CONTROL BAR */
+
+.controls{
+height:90px;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:15px;
+box-shadow:0 -2px 10px rgba(0,0,0,.1);
+}
+
+.control-btn{
+width:60px;
+height:60px;
+border:none;
+border-radius:50%;
+cursor:pointer;
+font-size:20px;
+background:#e9eef8;
+}
+
+.control-btn:hover{
+transform:scale(1.1);
+}
+
+.footer{
+text-align:center;
+padding:8px;
+font-size:12px;
+background:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+
+<div class="topbar">
+
+<div class="logo">
+CONNECTOR
+</div>
+
+<div class="top-right">
+
+<button class="help-btn"
+ onclick="openHelp()">
+Help & Feedback
+</button>
+
+<button class="leave-btn"
+onclick="leaveMeeting()">
+Leave
+</button>
+
+</div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+<div class="video-area" id="videoArea">
+
+WELCOME TO CONNECTOR
+
+</div>
+
+<div class="side-panel">
+
+<div class="participants">
+
+<h3>Participants</h3>
+
+<ul>
+<li>Aditya</li>
+<li>Pragya</li>
+<li>Gopal</li>
+</ul>
+
+</div>
+<button onclick="inviteUser()">
+📨 Invite 
+</button>
+
+<button onclick="muteAll()">
+🔇Mute All
+</button>
+
+<h3>🤖 Connector AI</h3>
+
+<div class="chat-box" id="chatBox">
+
+Hello Aditya Anand 👋
+
+I am Connector AI Assistant.
+
+How can I help you today?
+
+</div>
+
+<input
+id="chatInput"
+class="chat-input"
+type="text"
+placeholder="Type Message...">
+
+<button class="ai-btn" 
+onclick="openAI()">
+🤖 AI Assistant
+</button>
+
+</div>
+
+</div>
+
+<!-- CONTROLS -->
+
+<div class="controls">
+
+<button class="control-btn" id="micBtn">
+🎤
+</button>
+
+<button class="control-btn" id="cameraBtn">
+📹
+</button>
+
+<button class="control-btn"
+onclick="screenShare()">
+🖥️
+</button>
+
+<button class="control-btn"
+onclick="fileShare()">
+📁
+</button>
+
+<button class="control-btn"
+onclick="raiseHand()">
+✋
+</button>
+
+<button class="control-btn"
+onclick="openChat()">
+💬
+</button>
+
+<button class="control-btn"
+onclick="toggleRecording()">
+⏺️
+</button>
+
+</div>
+<input
+type="file"
+id="fileInput"
+hidden
+onchange="showSelectedFile()">
+
+<div class="footer">
+
+© 2026 Connector All Right Reserved | Developed By Aditya Anand
+
+</div>
+
+<script>
+
+let localStream = null;
+
+const videoArea = document.getElementById("videoArea");
+
+/* CAMERA */
+
+document.getElementById("cameraBtn")
+.addEventListener("click", async function(){
+
+try{
+
+if(!localStream){
+
+localStream =
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:true
+});
+
+videoArea.innerHTML = `
+<video id="localVideo"
+autoplay
+muted
+playsinline
+style="
+width:100%;
+height:100%;
+object-fit:cover;
+border-radius:20px;">
+</video>
+`;
+
+document.getElementById("localVideo")
+.srcObject = localStream;
+
+this.style.background = "green";
+
+}else{
+
+localStream.getVideoTracks()
+.forEach(track => track.enabled =
+!track.enabled);
+
+this.style.background =
+localStream.getVideoTracks()[0].enabled
+? "green"
+: "red";
+
+}
+
+}catch(err){
+
+alert("Camera Permission Denied");
+
+}
+
+});
+
+/* MIC */
+
+document.getElementById("micBtn")
+.addEventListener("click",function(){
+
+if(!localStream){
+
+alert("Turn On Camera First");
+
+return;
+
+}
+
+let audioTrack =
+localStream.getAudioTracks()[0];
+
+audioTrack.enabled =
+!audioTrack.enabled;
+
+this.style.background =
+audioTrack.enabled
+? "green"
+: "red";
+
+});
+
+/* SCREEN SHARE */
+
+async function screenShare(){
+
+try{
+
+const screenStream =
+await navigator.mediaDevices
+.getDisplayMedia({
+video:true
+});
+
+videoArea.innerHTML = `
+<video id="screenVideo"
+autoplay
+playsinline
+style="
+width:100%;
+height:100%;
+object-fit:cover;
+border-radius:20px;">
+</video>
+`;
+
+document.getElementById("screenVideo")
+.srcObject = screenStream;
+
+}catch(err){
+
+alert("Screen Share Cancelled");
+
+}
+
+}
+
+/* FILE SHARE */
+
+function fileShare(){
+
+document.getElementById("fileInput")
+.click();
+
+}
+
+/* HAND RAISE */
+
+function raiseHand(){
+
+alert("✋ Hand Raised");
+
+}
+
+/* AI ASSISTANT */
+
+function openAI(){
+
+letquestion =
+prompt("Ask AI Assistant");
+
+if(question){
+
+alert(
+"AI Assistant Received:\n\n"
++ question
+);
+
+}
+
+}
+
+/* HELP */
+
+function openHelp(){
+
+let choice = prompt(
+"CONNECTOR SETTINGS\n\n" +
+"1 = Account Settings\n" +
+"2 = App Language\n" +
+"3 = About Connector"
+);
+
+if(choice=="1"){
+
+alert(
+"Account Settings\n\n" +
+"Name: Aditya Anand\n" +
+"Status: Active User"
+);
+
+}
+
+else if(choice=="2"){
+
+let lang = prompt(
+"Choose Language:\n\n" +
+"1 = English\n" +
+"2 = Hindi"
+);
+
+if(lang=="1"){
+alert("Language Changed To English");
+}
+
+if(lang=="2"){
+alert("Language Changed To Hindi");
+}
+
+}
+
+else if(choice=="3"){
+
+alert(
+"Connector Meeting Platform\n\n" +
+"Version 1.0\n" +
+"Developed By Aditya Anand"
+);
+
+}
+
+}
+
+/* INVITE */
+
+function inviteUser(){
+
+let meetingLink = window.location.href;
+
+navigator.clipboard.writeText(meetingLink);
+
+alert("📨 Meeting Link Copied");
+
+}
+
+/* MUTE ALL */
+
+function muteAll(){
+
+alert ("All Participants Muted");
+
+
+if(localStream){
+
+localStream.getAudioTracks()
+.forEach(track => track.enabled = false);
+
+document.getElementById("micBtn").style.background = "red";
+
+}
+
+alert("🔇 All Participants Muted");
+
+}
+
+/* LEAVE */
+
+function leaveMeeting(){
+
+window.location.href =
+"register.html";
+
+}
+
+function showSelectedFile(){
+
+let file =
+document.getElementById("fileInput").files[0];
+
+if(file){
+
+document.getElementById("chatBox").innerHTML +=
+"<p>📁 "+file.name+"</p>";
+
+}
+
+}
+
+function raiseHand(){
+
+document.getElementById("chatBox").innerHTML +=
+"<p>✋ You Raised Your Hand</p>";
+
+}
+
+function openChat(){
+
+let msg =
+document.getElementById("chatInput").value;
+
+if(msg.trim()!=""){
+
+document.getElementById("chatBox").innerHTML +=
+"<p><b>You:</b> "+msg+"</p>";
+
+document.getElementById("chatInput").value="";
+
+}
+
+}
+
+function openAI(){
+
+let question =
+prompt("Ask Connector AI");
+
+if(question){
+
+document.getElementById("chatBox").innerHTML +=
+"<p><b>You:</b> "+question+"</p>";
+
+document.getElementById("chatBox").innerHTML +=
+"<p><b>AI:</b> Demo Response Active</p>";
+
+}
+
+}
+
+function openHelp(){
+
+alert("Connector Help Center");
+
+}
+
+function inviteUser(){
+
+let meetingLink = window.location.href;
+
+navigator.clipboard.writeText(meetingLink);
+
+alert("Meeting Link Copied");
+
+}
+
+function muteAll(){
+
+alert("All Participants Muted");
+
+}
+
+</script>
+
+</body>
+</html>

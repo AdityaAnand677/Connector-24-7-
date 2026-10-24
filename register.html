@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connector - Login & Register</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#ffd6e8,#dff1ff,#ffffff);
+padding:20px;
+}
+
+.container{
+width:450px;
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+
+.logo{
+text-align:center;
+font-size:35px;
+font-weight:bold;
+color:#ff5fa2;
+margin-bottom:20px;
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+color:#4a90e2;
+}
+
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:1px solid #ccc;
+border-radius:10px;
+font-size:15px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#ff5fa2;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+opacity:.9;
+}
+
+.switch-btn{
+background:#4a90e2;
+}
+
+.hidden{
+display:none;
+}
+
+.captcha{
+text-align:center;
+font-size:22px;
+font-weight:bold;
+color:#4a90e2;
+margin:10px 0;
+}
+
+.footer{
+text-align:center;
+margin-top:20px;
+font-size:12px;
+color:#666;
+}
+
+.link{
+text-align:center;
+margin-top:10px;
+cursor:pointer;
+color:#4a90e2;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">CONNECTOR</div>
+
+<!-- REGISTER -->
+
+<div id="registerSection">
+
+<h2>Create Account</h2>
+
+<input type="text" id="fullname" placeholder="Full Name">
+
+<input type="text" id="course" placeholder="Course">
+
+<input type="text" id="rollno" placeholder="Roll Number">
+
+<input type="text" id="regUsername" placeholder="Username">
+
+<input type="password" id="regPassword" placeholder="Password">
+
+<input type="password" id="confirmPassword" placeholder="Confirm Password">
+
+<div class="captcha">
+<span id="captchaText"></span>
+</div>
+
+<input type="text" id="captchaInput" placeholder="Enter Captcha">
+
+<button onclick="registerUser()">Register</button>
+
+<button class="switch-btn" onclick="showLogin()">
+Already Registered? Login
+</button>
+
+</div>
+
+<!-- LOGIN -->
+
+<div id="loginSection" class="hidden">
+
+<h2>Login</h2>
+
+<input type="text" id="loginUsername" placeholder="Username">
+
+<input type="password" id="loginPassword" placeholder="Password">
+
+<div class="captcha">
+<span id="loginCaptcha"></span>
+</div>
+
+<input type="text"
+id="loginCaptchaInput"
+placeholder="Enter Captcha">
+
+<button onclick="loginUser()">
+Login
+</button>
+
+<div class="link"
+onclick="forgotPassword()">
+Forgot Password?
+</div>
+
+<button class="switch-btn"
+onclick="showRegister()">
+Create New Account
+</button>
+
+</div>
+
+<div class="footer">
+© Copyright Reserved By Aditya Anand
+</div>
+
+</div>
+
+<script>
+
+let captchaValue="";
+let loginCaptchaValue="";
+
+function generateCaptcha(){
+
+captchaValue=
+Math.floor(1000+Math.random()*9000);
+
+document.getElementById("captchaText")
+.innerText=captchaValue;
+
+loginCaptchaValue=
+Math.floor(1000+Math.random()*9000);
+
+document.getElementById("loginCaptcha")
+.innerText=loginCaptchaValue;
+}
+
+generateCaptcha();
+
+function registerUser(){
+
+let fullname=
+document.getElementById("fullname").value;
+
+let course=
+document.getElementById("course").value;
+
+let rollno=
+document.getElementById("rollno").value;
+
+let username=
+document.getElementById("regUsername").value;
+
+let password=
+document.getElementById("regPassword").value;
+
+let confirm=
+document.getElementById("confirmPassword").value;
+
+let captcha=
+document.getElementById("captchaInput").value;
+
+if(
+!fullname ||
+!course ||
+!rollno ||
+!username ||
+!password
+){
+alert("Fill All Fields");
+return;
+}
+
+if(password!==confirm){
+alert("Passwords Do Not Match");
+return;
+}
+
+if(captcha!=captchaValue){
+alert("Wrong Captcha");
+return;
+}
+
+let user={
+fullname,
+course,
+rollno,
+username,
+password
+};
+
+localStorage.setItem(
+username,
+JSON.stringify(user)
+);
+
+alert("Registration Successful");
+
+showLogin();
+
+}
+
+function loginUser(){
+
+let username=
+document.getElementById("loginUsername").value;
+
+let password=
+document.getElementById("loginPassword").value;
+
+let captcha=
+document.getElementById("loginCaptchaInput").value;
+
+if(captcha!=loginCaptchaValue){
+alert("Wrong Captcha");
+return;
+}
+
+let user=
+localStorage.getItem(username);
+
+if(!user){
+alert("User Not Found");
+return;
+}
+
+let data=
+JSON.parse(user);
+
+if(data.password===password){
+
+localStorage.setItem(
+"currentUser",
+data.fullname
+);
+
+window.location.href="call.html";
+
+}else{
+
+alert("Wrong Password");
+
+}
+
+}
+
+function forgotPassword(){
+
+let username=
+prompt("Enter Username");
+
+if(username){
+
+alert(
+"OTP System Will Be Added With Backend Later"
+);
+
+}
+
+}
+
+function showLogin(){
+
+document.getElementById("registerSection")
+.classList.add("hidden");
+
+document.getElementById("loginSection")
+.classList.remove("hidden");
+
+}
+
+function showRegister(){
+
+document.getElementById("loginSection")
+.classList.add("hidden");
+
+document.getElementById("registerSection")
+.classList.remove("hidden");
+
+}
+
+</script>
+
+</body>
+</html>
